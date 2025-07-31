@@ -1,0 +1,282 @@
+<div class="admin-bg d-flex flex-column min-vh-100">
+  <div class="container-fluid py-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-12">
+        <div class="card shadow-lg border-0">
+          <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+              <h3 class="mb-0">
+                <i class="fa fa-file-invoice-dollar me-2"></i>Manage Bills
+              </h3>
+              <button class="btn btn-light" routerLink="/admin/bills">
+                <i class="fa fa-search me-1"></i>Search Bills
+              </button>
+            </div>
+          </div>
+          <div class="card-body p-4">
+            
+            <!-- Filters and Search -->
+            <div class="row mb-4">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">
+                  <i class="fa fa-search me-1"></i>Search Bills
+                </label>
+                <input type="text" class="form-control" [(ngModel)]="searchTerm" 
+                       (input)="onSearch()" placeholder="Search by bill ID or customer name">
+              </div>
+              
+              <div class="col-md-4 mb-3">
+                <label class="form-label fw-semibold">
+                  <i class="fa fa-filter me-1"></i>Payment Status
+                </label>
+                <select class="form-select" [(ngModel)]="statusFilter" (change)="onStatusFilter()">
+                  <option value="">All Status</option>
+                  <option value="Paid">Paid</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Overdue">Overdue</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+              </div>
+              
+              <div class="col-md-2 mb-3">
+                <label class="form-label fw-semibold">
+                  <i class="fa fa-plus me-1"></i>Actions
+                </label>
+                <button class="btn btn-success w-100">
+                  <i class="fa fa-plus me-1"></i>New Bill
+                </button>
+              </div>
+            </div>
+
+            <!-- Bills Table -->
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead class="table-dark">
+                  <tr>
+                    <th>Bill ID</th>
+                    <th>Customer Name</th>
+                    <th>Date</th>
+                    <th>Items</th>
+                    <th>Subtotal</th>
+                    <th>Tax</th>
+                    <th>Total Amount</th>
+                    <th>Payment Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let bill of paginatedBills">
+                    <td>
+                      <strong>{{ bill.id }}</strong>
+                    </td>
+                    <td>{{ bill.customerName }}</td>
+                    <td>{{ bill.date }}</td>
+                    <td>
+                      <small class="text-muted">
+                        {{ bill.items.length }} items
+                      </small>
+                    </td>
+                    <td>${{ bill.subtotal }}</td>
+                    <td>${{ bill.tax }}</td>
+                    <td>
+                      <strong>${{ bill.totalAmount }}</strong>
+                    </td>
+                    <td>
+                      <span [class]="getStatusBadgeClass(bill.paymentStatus)">
+                        {{ bill.paymentStatus }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-primary" 
+                                (click)="editBill(bill)" title="Edit Bill">
+                          <i class="fa fa-edit"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-success" 
+                                (click)="markAsPaid(bill)" 
+                                *ngIf="bill.paymentStatus === 'Pending'" title="Mark as Paid">
+                          <i class="fa fa-check"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-info" 
+                                (click)="printBill(bill)" title="Print Bill">
+                          <i class="fa fa-print"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-warning" 
+                                (click)="downloadBill(bill)" title="Download">
+                          <i class="fa fa-download"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-danger" 
+                                (click)="deleteBill(bill)" title="Delete Bill">
+                          <i class="fa fa-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination -->
+            <div *ngIf="totalPages > 1" class="d-flex justify-content-center mt-4">
+              <nav>
+                <ul class="pagination">
+                  <li class="page-item" [class.disabled]="currentPage === 1">
+                    <button class="page-link" (click)="changePage(currentPage - 1)">
+                      <i class="fa fa-chevron-left"></i>
+                    </button>
+                  </li>
+                  
+                  <li class="page-item" *ngFor="let page of [].constructor(totalPages); let i = index"
+                      [class.active]="currentPage === i + 1">
+                    <button class="page-link" (click)="changePage(i + 1)">
+                      {{ i + 1 }}
+                    </button>
+                  </li>
+                  
+                  <li class="page-item" [class.disabled]="currentPage === totalPages">
+                    <button class="page-link" (click)="changePage(currentPage + 1)">
+                      <i class="fa fa-chevron-right"></i>
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+
+            <!-- No Results -->
+            <div *ngIf="filteredBills.length === 0" class="text-center py-5">
+              <i class="fa fa-file-invoice-dollar fa-3x text-muted mb-3"></i>
+              <h5 class="text-muted">No bills found</h5>
+              <p class="text-muted">Try adjusting your search criteria</p>
+            </div>
+
+            <!-- Bill Count -->
+            <div class="mt-3 text-muted">
+              <small>
+                <i class="fa fa-info-circle me-1"></i>
+                Showing {{ paginatedBills.length }} of {{ filteredBills.length }} bills
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Bill Modal -->
+<div class="modal fade" id="editBillModal" tabindex="-1" *ngIf="editingBill">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="fa fa-edit me-2"></i>Edit Bill {{ editingBill.id }}
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="cancelEdit()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Customer Name</label>
+            <input type="text" class="form-control" [(ngModel)]="editingBill.customerName">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Customer ID</label>
+            <input type="text" class="form-control" [(ngModel)]="editingBill.customerId">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Date</label>
+            <input type="date" class="form-control" [(ngModel)]="editingBill.date">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Payment Status</label>
+            <select class="form-select" [(ngModel)]="editingBill.paymentStatus">
+              <option value="Pending">Pending</option>
+              <option value="Paid">Paid</option>
+              <option value="Overdue">Overdue</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- Bill Items -->
+        <div class="mb-4">
+          <h6 class="fw-semibold mb-3">Bill Items</h6>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead class="table-light">
+                <tr>
+                  <th>Item Name</th>
+                  <th>Amount</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of editingBill.items; let i = index">
+                  <td>{{ item.name }}</td>
+                  <td>${{ item.amount }}</td>
+                  <td>
+                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                            (click)="removeItem(i)">
+                      <i class="fa fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Add New Item -->
+          <div class="row">
+            <div class="col-md-6 mb-2">
+              <input type="text" class="form-control" [(ngModel)]="newItem.name" 
+                     placeholder="Item name">
+            </div>
+            <div class="col-md-4 mb-2">
+              <input type="number" class="form-control" [(ngModel)]="newItem.amount" 
+                     placeholder="Amount">
+            </div>
+            <div class="col-md-2 mb-2">
+              <button type="button" class="btn btn-success w-100" (click)="addItem()">
+                <i class="fa fa-plus"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Bill Summary -->
+        <div class="row">
+          <div class="col-md-6 offset-md-6">
+            <div class="card">
+              <div class="card-body">
+                <h6 class="fw-semibold">Bill Summary</h6>
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Subtotal:</span>
+                  <span>${{ editingBill.subtotal }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Tax (10%):</span>
+                  <span>${{ editingBill.tax }}</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between fw-bold">
+                  <span>Total:</span>
+                  <span>${{ editingBill.totalAmount }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancelEdit()">
+          <i class="fa fa-times me-1"></i>Cancel
+        </button>
+        <button type="button" class="btn btn-primary" (click)="saveBill()">
+          <i class="fa fa-save me-1"></i>Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

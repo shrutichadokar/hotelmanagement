@@ -1,0 +1,182 @@
+<div class="admin-bg d-flex flex-column min-vh-100">
+  <div class="container-fluid py-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card shadow-lg border-0">
+          <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">
+              <i class="fa fa-plus-circle me-2"></i>Add New Room
+            </h3>
+          </div>
+          <div class="card-body p-4">
+            
+            <!-- Toggle between Single and Bulk Upload -->
+            <div class="mb-4">
+              <div class="btn-group w-100" role="group">
+                <input type="radio" class="btn-check" name="uploadType" id="singleUpload" 
+                       [checked]="!isBulkUpload" (change)="isBulkUpload = false">
+                <label class="btn btn-outline-primary" for="singleUpload">
+                  <i class="fa fa-plus me-2"></i>Single Room
+                </label>
+                
+                <input type="radio" class="btn-check" name="uploadType" id="bulkUpload" 
+                       [checked]="isBulkUpload" (change)="isBulkUpload = true">
+                <label class="btn btn-outline-primary" for="bulkUpload">
+                  <i class="fa fa-upload me-2"></i>Bulk Upload
+                </label>
+              </div>
+            </div>
+
+            <!-- Single Room Form -->
+            <div *ngIf="!isBulkUpload">
+              <form [formGroup]="roomForm" (ngSubmit)="onSubmit()">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label fw-semibold">
+                      <i class="fa fa-hashtag me-1"></i>Room Number
+                    </label>
+                    <div class="input-group">
+                      <input type="text" class="form-control" formControlName="roomNumber" 
+                             placeholder="Enter room number">
+                      <button type="button" class="btn btn-outline-secondary" (click)="generateRoomNumber()">
+                        <i class="fa fa-magic"></i> Auto
+                      </button>
+                    </div>
+                    <div *ngIf="f['roomNumber'].touched && f['roomNumber'].errors" class="text-danger small mt-1">
+                      <div *ngIf="f['roomNumber'].errors?.['required']">Room number is required</div>
+                      <div *ngIf="f['roomNumber'].errors?.['pattern']">Room number must be numeric</div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label fw-semibold">
+                      <i class="fa fa-bed me-1"></i>Room Type
+                    </label>
+                    <select class="form-select" formControlName="roomType">
+                      <option value="">Select room type</option>
+                      <option value="Standard">Standard</option>
+                      <option value="Deluxe">Deluxe</option>
+                      <option value="Suite">Suite</option>
+                      <option value="Presidential">Presidential</option>
+                      <option value="Family">Family</option>
+                    </select>
+                    <div *ngIf="f['roomType'].touched && f['roomType'].errors?.['required']" class="text-danger small mt-1">
+                      Room type is required
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label fw-semibold">
+                      <i class="fa fa-dollar me-1"></i>Price per Night
+                    </label>
+                    <input type="number" class="form-control" formControlName="price" 
+                           placeholder="Enter price">
+                    <div *ngIf="f['price'].touched && f['price'].errors" class="text-danger small mt-1">
+                      <div *ngIf="f['price'].errors?.['required']">Price is required</div>
+                      <div *ngIf="f['price'].errors?.['min']">Price must be positive</div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label fw-semibold">
+                      <i class="fa fa-users me-1"></i>Max Occupancy
+                    </label>
+                    <input type="number" class="form-control" formControlName="maxOccupancy" 
+                           placeholder="Enter max occupancy">
+                    <div *ngIf="f['maxOccupancy'].touched && f['maxOccupancy'].errors" class="text-danger small mt-1">
+                      <div *ngIf="f['maxOccupancy'].errors?.['required']">Max occupancy is required</div>
+                      <div *ngIf="f['maxOccupancy'].errors?.['min'] || f['maxOccupancy'].errors?.['max']">
+                        Max occupancy must be between 1 and 10
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">
+                    <i class="fa fa-align-left me-1"></i>Description
+                  </label>
+                  <textarea class="form-control" rows="3" formControlName="description" 
+                            placeholder="Enter room description"></textarea>
+                  <div *ngIf="f['description'].touched && f['description'].errors?.['required']" class="text-danger small mt-1">
+                    Description is required
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">
+                    <i class="fa fa-star me-1"></i>Amenities
+                  </label>
+                  <div class="row">
+                    <div class="col-md-4 mb-2" *ngFor="let amenity of amenities">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                               [id]="amenity" 
+                               [checked]="selectedAmenities.includes(amenity)"
+                               (change)="toggleAmenity(amenity)">
+                        <label class="form-check-label" [for]="amenity">
+                          {{ amenity }}
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div *ngIf="selectedAmenities.length === 0" class="text-warning small">
+                    Please select at least one amenity
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" formControlName="availability" id="availability">
+                    <label class="form-check-label" for="availability">
+                      <i class="fa fa-check-circle me-1"></i>Available for booking
+                    </label>
+                  </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <button type="button" class="btn btn-secondary me-md-2" (click)="roomForm.reset()">
+                    <i class="fa fa-refresh me-1"></i>Reset
+                  </button>
+                  <button type="submit" class="btn btn-primary" [disabled]="roomForm.invalid || selectedAmenities.length === 0">
+                    <i class="fa fa-save me-1"></i>Add Room
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Bulk Upload Form -->
+            <div *ngIf="isBulkUpload">
+              <div class="alert alert-info">
+                <i class="fa fa-info-circle me-2"></i>
+                Upload a CSV file with room data. 
+                <button type="button" class="btn btn-link p-0" (click)="downloadCSVTemplate()">
+                  Download template
+                </button>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-semibold">
+                  <i class="fa fa-file-text me-1"></i>CSV Data
+                </label>
+                <textarea class="form-control" rows="10" [(ngModel)]="csvData" 
+                          placeholder="Paste your CSV data here..."></textarea>
+              </div>
+
+              <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="button" class="btn btn-secondary me-md-2" (click)="csvData = ''">
+                  <i class="fa fa-trash me-1"></i>Clear
+                </button>
+                <button type="button" class="btn btn-success" (click)="onBulkUpload()" [disabled]="!csvData.trim()">
+                  <i class="fa fa-upload me-1"></i>Upload Rooms
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

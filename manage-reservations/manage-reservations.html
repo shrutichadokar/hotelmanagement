@@ -1,0 +1,234 @@
+<div class="admin-bg d-flex flex-column min-vh-100">
+  <div class="container-fluid py-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-12">
+        <div class="card shadow-lg border-0">
+          <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+              <h3 class="mb-0">
+                <i class="fa fa-calendar me-2"></i>Manage Reservations
+              </h3>
+              <button class="btn btn-light" routerLink="/admin/search-reservations">
+                <i class="fa fa-search me-1"></i>Search Reservations
+              </button>
+            </div>
+          </div>
+          <div class="card-body p-4">
+            
+            <!-- Filters and Search -->
+            <div class="row mb-4">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">
+                  <i class="fa fa-search me-1"></i>Search Reservations
+                </label>
+                <input type="text" class="form-control" [(ngModel)]="searchTerm" 
+                       (input)="onSearch()" placeholder="Search by ID, customer name, or room number">
+              </div>
+              
+              <div class="col-md-4 mb-3">
+                <label class="form-label fw-semibold">
+                  <i class="fa fa-filter me-1"></i>Status Filter
+                </label>
+                <select class="form-select" [(ngModel)]="statusFilter" (change)="onStatusFilter()">
+                  <option value="">All Status</option>
+                  <option value="Confirmed">Confirmed</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Cancelled">Cancelled</option>
+                  <option value="Completed">Completed</option>
+                </select>
+              </div>
+              
+              <div class="col-md-2 mb-3">
+                <label class="form-label fw-semibold">
+                  <i class="fa fa-plus me-1"></i>Actions
+                </label>
+                <button class="btn btn-success w-100" routerLink="/admin/add-reservations">
+                  <i class="fa fa-plus me-1"></i>New
+                </button>
+              </div>
+            </div>
+
+            <!-- Reservations Table -->
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead class="table-dark">
+                  <tr>
+                    <th>Reservation ID</th>
+                    <th>Customer Name</th>
+                    <th>Room Number</th>
+                    <th>Check-in</th>
+                    <th>Check-out</th>
+                    <th>Status</th>
+                    <th>Total Amount</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let reservation of paginatedReservations">
+                    <td>
+                      <strong>{{ reservation.id }}</strong>
+                    </td>
+                    <td>
+                      <div>{{ reservation.customerName }}</div>
+                      <small class="text-muted">{{ reservation.customerEmail }}</small>
+                    </td>
+                    <td>{{ reservation.roomNumber }}</td>
+                    <td>{{ reservation.checkIn }}</td>
+                    <td>{{ reservation.checkOut }}</td>
+                    <td>
+                      <span [class]="getStatusBadgeClass(reservation.status)">
+                        {{ reservation.status }}
+                      </span>
+                    </td>
+                    <td>${{ reservation.totalAmount }}</td>
+                    <td>
+                      <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-primary" 
+                                (click)="editReservation(reservation)" title="Edit">
+                          <i class="fa fa-edit"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-success" 
+                                (click)="confirmReservation(reservation)" 
+                                *ngIf="reservation.status === 'Pending'" title="Confirm">
+                          <i class="fa fa-check"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-warning" 
+                                (click)="cancelReservation(reservation)" 
+                                *ngIf="reservation.status === 'Confirmed'" title="Cancel">
+                          <i class="fa fa-times"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-info" 
+                                (click)="completeReservation(reservation)" 
+                                *ngIf="reservation.status === 'Confirmed'" title="Complete">
+                          <i class="fa fa-flag-checkered"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-danger" 
+                                (click)="deleteReservation(reservation)" title="Delete">
+                          <i class="fa fa-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination -->
+            <div *ngIf="totalPages > 1" class="d-flex justify-content-center mt-4">
+              <nav>
+                <ul class="pagination">
+                  <li class="page-item" [class.disabled]="currentPage === 1">
+                    <button class="page-link" (click)="changePage(currentPage - 1)">
+                      <i class="fa fa-chevron-left"></i>
+                    </button>
+                  </li>
+                  
+                  <li class="page-item" *ngFor="let page of [].constructor(totalPages); let i = index"
+                      [class.active]="currentPage === i + 1">
+                    <button class="page-link" (click)="changePage(i + 1)">
+                      {{ i + 1 }}
+                    </button>
+                  </li>
+                  
+                  <li class="page-item" [class.disabled]="currentPage === totalPages">
+                    <button class="page-link" (click)="changePage(currentPage + 1)">
+                      <i class="fa fa-chevron-right"></i>
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+
+            <!-- No Results -->
+            <div *ngIf="filteredReservations.length === 0" class="text-center py-5">
+              <i class="fa fa-calendar fa-3x text-muted mb-3"></i>
+              <h5 class="text-muted">No reservations found</h5>
+              <p class="text-muted">Try adjusting your search criteria</p>
+            </div>
+
+            <!-- Reservation Count -->
+            <div class="mt-3 text-muted">
+              <small>
+                <i class="fa fa-info-circle me-1"></i>
+                Showing {{ paginatedReservations.length }} of {{ filteredReservations.length }} reservations
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Reservation Modal -->
+<div class="modal fade" id="editReservationModal" tabindex="-1" *ngIf="editingReservation">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="fa fa-edit me-2"></i>Edit Reservation {{ editingReservation.id }}
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="cancelEdit()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Customer Name</label>
+            <input type="text" class="form-control" [(ngModel)]="editingReservation.customerName">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Customer Email</label>
+            <input type="email" class="form-control" [(ngModel)]="editingReservation.customerEmail">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Room Number</label>
+            <input type="text" class="form-control" [(ngModel)]="editingReservation.roomNumber">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Status</label>
+            <select class="form-select" [(ngModel)]="editingReservation.status">
+              <option value="Pending">Pending</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Cancelled">Cancelled</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Check-in Date</label>
+            <input type="date" class="form-control" [(ngModel)]="editingReservation.checkIn">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Check-out Date</label>
+            <input type="date" class="form-control" [(ngModel)]="editingReservation.checkOut">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Number of Guests</label>
+            <input type="number" class="form-control" [(ngModel)]="editingReservation.guests">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Total Amount</label>
+            <input type="number" class="form-control" [(ngModel)]="editingReservation.totalAmount">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Special Requests</label>
+          <textarea class="form-control" rows="3" [(ngModel)]="editingReservation.specialRequests"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancelEdit()">
+          <i class="fa fa-times me-1"></i>Cancel
+        </button>
+        <button type="button" class="btn btn-primary" (click)="saveReservation()">
+          <i class="fa fa-save me-1"></i>Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
