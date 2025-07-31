@@ -1,0 +1,324 @@
+<div class="staff-dashboard-bg d-flex flex-column min-vh-100">
+  <div class="container-fluid py-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-12">
+        
+        <!-- Staff Header -->
+        <div class="card shadow-lg border-0 mb-4">
+          <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h3 class="mb-0">
+                  <i class="fa fa-tools me-2"></i>Staff Dashboard
+                </h3>
+                <small>Welcome back, {{ currentStaff.name }} - {{ currentStaff.role }}</small>
+              </div>
+              <div class="text-end">
+                <div class="badge bg-light text-dark me-2">
+                  <i class="fa fa-user me-1"></i>{{ currentStaff.department }}
+                </div>
+                <div class="badge bg-light text-dark">
+                  <i class="fa fa-clock me-1"></i>{{ currentTime }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Statistics Dashboard -->
+        <div class="row mb-4">
+          <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+            <div class="card shadow-lg border-0 h-100">
+              <div class="card-body text-center">
+                <div class="stats-icon bg-primary">
+                  <i class="fa fa-list text-white"></i>
+                </div>
+                <h3 class="mt-3 mb-1">{{ stats.totalAssignedComplaints }}</h3>
+                <p class="text-muted mb-0">Total Assigned</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+            <div class="card shadow-lg border-0 h-100">
+              <div class="card-body text-center">
+                <div class="stats-icon bg-warning">
+                  <i class="fa fa-exclamation-triangle text-white"></i>
+                </div>
+                <h3 class="mt-3 mb-1">{{ stats.openComplaints }}</h3>
+                <p class="text-muted mb-0">Open</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+            <div class="card shadow-lg border-0 h-100">
+              <div class="card-body text-center">
+                <div class="stats-icon bg-info">
+                  <i class="fa fa-cogs text-white"></i>
+                </div>
+                <h3 class="mt-3 mb-1">{{ stats.inProgressComplaints }}</h3>
+                <p class="text-muted mb-0">In Progress</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+            <div class="card shadow-lg border-0 h-100">
+              <div class="card-body text-center">
+                <div class="stats-icon bg-success">
+                  <i class="fa fa-check-circle text-white"></i>
+                </div>
+                <h3 class="mt-3 mb-1">{{ stats.resolvedComplaints }}</h3>
+                <p class="text-muted mb-0">Resolved</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+            <div class="card shadow-lg border-0 h-100">
+              <div class="card-body text-center">
+                <div class="stats-icon bg-info">
+                  <i class="fa fa-clock text-white"></i>
+                </div>
+                <h3 class="mt-3 mb-1">{{ stats.averageResolutionTime }}</h3>
+                <p class="text-muted mb-0">Avg. Resolution</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+            <div class="card shadow-lg border-0 h-100">
+              <div class="card-body text-center">
+                <div class="stats-icon bg-success">
+                  <i class="fa fa-star text-white"></i>
+                </div>
+                <h3 class="mt-3 mb-1">{{ stats.customerSatisfaction }}</h3>
+                <p class="text-muted mb-0">Satisfaction</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="row">
+          <!-- Quick Actions -->
+          <div class="col-lg-8 mb-4">
+            <div class="card shadow-lg border-0">
+              <div class="card-header bg-light">
+                <h4 class="mb-0">
+                  <i class="fa fa-bolt me-2"></i>Quick Actions
+                </h4>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6 mb-3" *ngFor="let action of quickActions">
+                    <div class="quick-action-card" [routerLink]="action.route">
+                      <div class="d-flex align-items-center p-3">
+                        <div class="action-icon bg-{{ action.color }}">
+                          <i class="fa {{ action.icon }} text-white"></i>
+                        </div>
+                        <div class="ms-3">
+                          <h6 class="mb-1">{{ action.title }}</h6>
+                          <small class="text-muted">{{ action.description }}</small>
+                        </div>
+                        <i class="fa fa-chevron-right ms-auto text-muted"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Performance Metrics -->
+          <div class="col-lg-4 mb-4">
+            <div class="card shadow-lg border-0">
+              <div class="card-header bg-info text-white">
+                <h4 class="mb-0">
+                  <i class="fa fa-chart-line me-2"></i>Performance Metrics
+                </h4>
+              </div>
+              <div class="card-body">
+                <div class="mb-3">
+                  <div class="d-flex justify-content-between">
+                    <span>Response Time</span>
+                    <strong>{{ performanceMetrics.responseTime }}</strong>
+                  </div>
+                  <div class="progress mt-1" style="height: 8px;">
+                    <div class="progress-bar bg-success" style="width: 85%"></div>
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <div class="d-flex justify-content-between">
+                    <span>Resolution Rate</span>
+                    <strong>{{ performanceMetrics.resolutionRate }}</strong>
+                  </div>
+                  <div class="progress mt-1" style="height: 8px;">
+                    <div class="progress-bar bg-info" style="width: 94%"></div>
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <div class="d-flex justify-content-between">
+                    <span>Customer Rating</span>
+                    <strong [class]="getPerformanceColor(performanceMetrics.customerRating)">
+                      {{ performanceMetrics.customerRating }}/5.0
+                    </strong>
+                  </div>
+                  <div class="progress mt-1" style="height: 8px;">
+                    <div class="progress-bar bg-warning" style="width: 96%"></div>
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <div class="d-flex justify-content-between">
+                    <span>Workload</span>
+                    <strong [class]="getWorkloadColor()">{{ getWorkloadStatus() }}</strong>
+                  </div>
+                  <div class="progress mt-1" style="height: 8px;">
+                    <div class="progress-bar" 
+                         [class]="getWorkloadColor() === 'text-danger' ? 'bg-danger' : 
+                                  getWorkloadColor() === 'text-warning' ? 'bg-warning' : 'bg-success'"
+                         [style.width.%]="getWorkloadPercentage()"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activities and Upcoming Tasks -->
+        <div class="row">
+          <!-- Recent Activities -->
+          <div class="col-lg-6 mb-4">
+            <div class="card shadow-lg border-0">
+              <div class="card-header bg-success text-white">
+                <h4 class="mb-0">
+                  <i class="fa fa-history me-2"></i>Recent Activities
+                </h4>
+              </div>
+              <div class="card-body">
+                <div class="activity-list">
+                  <div *ngFor="let activity of recentActivities" class="activity-item d-flex align-items-center mb-3">
+                    <div class="activity-icon me-3">
+                      <i class="fa {{ activity.icon }} {{ getActivityColor(activity) }} fa-lg"></i>
+                    </div>
+                    <div class="activity-content flex-grow-1">
+                      <p class="mb-1">{{ activity.message }}</p>
+                      <small class="text-muted">{{ activity.time }}</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Upcoming Tasks -->
+          <div class="col-lg-6 mb-4">
+            <div class="card shadow-lg border-0">
+              <div class="card-header bg-warning text-white">
+                <h4 class="mb-0">
+                  <i class="fa fa-calendar me-2"></i>Upcoming Tasks
+                </h4>
+              </div>
+              <div class="card-body">
+                <div class="task-list">
+                  <div *ngFor="let task of upcomingTasks" class="task-item d-flex align-items-center mb-3 p-3 border rounded">
+                    <div class="task-icon me-3">
+                      <i class="fa fa-tasks text-primary"></i>
+                    </div>
+                    <div class="task-content flex-grow-1">
+                      <h6 class="mb-1">{{ task.title }}</h6>
+                      <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Due: {{ task.dueDate }}</small>
+                        <span [class]="getPriorityBadgeClass(task.priority)">
+                          {{ task.priority }}
+                        </span>
+                      </div>
+                      <small class="text-muted">Estimated: {{ task.estimatedTime }}</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <div class="row">
+          <div class="col-12">
+            <div class="card shadow-lg border-0">
+              <div class="card-header bg-secondary text-white">
+                <h4 class="mb-0">
+                  <i class="fa fa-bars me-2"></i>Navigation Menu
+                </h4>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6 col-lg-4 mb-3" *ngFor="let item of navMenuItems">
+                    <div class="nav-item-card" [routerLink]="item.route">
+                      <div class="d-flex align-items-center p-3">
+                        <div class="nav-icon me-3">
+                          <i class="fa {{ item.icon }} text-primary fa-lg"></i>
+                        </div>
+                        <div>
+                          <h6 class="mb-1">{{ item.title }}</h6>
+                          <small class="text-muted">{{ item.description }}</small>
+                        </div>
+                        <i class="fa fa-chevron-right ms-auto text-muted"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Staff Information -->
+        <div class="row mt-4">
+          <div class="col-12">
+            <div class="card shadow-lg border-0">
+              <div class="card-header bg-dark text-white">
+                <h4 class="mb-0">
+                  <i class="fa fa-user me-2"></i>Staff Information
+                </h4>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <h6 class="fw-bold">Personal Information</h6>
+                    <p><strong>Name:</strong> {{ currentStaff.name }}</p>
+                    <p><strong>Role:</strong> {{ currentStaff.role }}</p>
+                    <p><strong>Department:</strong> {{ currentStaff.department }}</p>
+                    <p><strong>Employee ID:</strong> {{ currentStaff.id }}</p>
+                    <p><strong>Join Date:</strong> {{ currentStaff.joinDate }}</p>
+                  </div>
+                  <div class="col-md-6">
+                    <h6 class="fw-bold">Areas of Expertise</h6>
+                    <div class="expertise-tags">
+                      <span *ngFor="let expertise of currentStaff.expertise" 
+                            class="badge bg-primary me-2 mb-2">
+                        {{ expertise }}
+                      </span>
+                    </div>
+                    <h6 class="fw-bold mt-3">Performance Summary</h6>
+                    <p><strong>Completed Tasks:</strong> {{ performanceMetrics.completedTasks }}</p>
+                    <p><strong>Pending Tasks:</strong> {{ performanceMetrics.pendingTasks }}</p>
+                    <p><strong>Customer Rating:</strong> 
+                      <span [class]="getPerformanceColor(performanceMetrics.customerRating)">
+                        {{ performanceMetrics.customerRating }}/5.0
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

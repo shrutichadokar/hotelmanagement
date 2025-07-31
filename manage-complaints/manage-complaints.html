@@ -1,23 +1,101 @@
-<div class="admin-bg d-flex flex-column min-vh-100">
+<div class="staff-bg d-flex flex-column min-vh-100">
   <div class="container-fluid py-4">
     <div class="row justify-content-center">
       <div class="col-lg-12">
-        <div class="card shadow-lg border-0">
+        
+        <!-- Staff Header -->
+        <div class="card shadow-lg border-0 mb-4">
           <div class="card-header bg-primary text-white">
             <div class="d-flex justify-content-between align-items-center">
-              <h3 class="mb-0">
-                <i class="fa fa-exclamation-triangle me-2"></i>Manage Complaints
-              </h3>
-              <button class="btn btn-light">
-                <i class="fa fa-plus me-1"></i>New Complaint
-              </button>
+              <div>
+                <h3 class="mb-0">
+                  <i class="fa fa-tools me-2"></i>Staff Complaint Management
+                </h3>
+                <small>Welcome, {{ currentStaff.name }} - {{ currentStaff.department }}</small>
+              </div>
+              <div class="text-end">
+                <div class="badge bg-light text-dark me-2">
+                  <i class="fa fa-user me-1"></i>{{ currentStaff.department }}
+                </div>
+                                 <div class="badge bg-light text-dark">
+                   <i class="fa fa-clock me-1"></i>{{ currentDate }}
+                 </div>
+              </div>
             </div>
           </div>
+        </div>
+
+        <!-- Statistics Dashboard -->
+        <div class="row mb-4">
+          <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card shadow-lg border-0 h-100">
+              <div class="card-body text-center">
+                <div class="stats-icon bg-primary">
+                  <i class="fa fa-list text-white"></i>
+                </div>
+                <h3 class="mt-3 mb-1">{{ getComplaintStats().total }}</h3>
+                <p class="text-muted mb-0">Total Assigned</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card shadow-lg border-0 h-100">
+              <div class="card-body text-center">
+                <div class="stats-icon bg-warning">
+                  <i class="fa fa-exclamation-triangle text-white"></i>
+                </div>
+                <h3 class="mt-3 mb-1">{{ getComplaintStats().open }}</h3>
+                <p class="text-muted mb-0">Open Complaints</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card shadow-lg border-0 h-100">
+              <div class="card-body text-center">
+                <div class="stats-icon bg-info">
+                  <i class="fa fa-cogs text-white"></i>
+                </div>
+                <h3 class="mt-3 mb-1">{{ getComplaintStats().inProgress }}</h3>
+                <p class="text-muted mb-0">In Progress</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card shadow-lg border-0 h-100">
+              <div class="card-body text-center">
+                <div class="stats-icon bg-success">
+                  <i class="fa fa-check-circle text-white"></i>
+                </div>
+                <h3 class="mt-3 mb-1">{{ getComplaintStats().resolved }}</h3>
+                <p class="text-muted mb-0">Resolved</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="card shadow-lg border-0">
+          <div class="card-header bg-light">
+            <div class="d-flex justify-content-between align-items-center">
+              <h4 class="mb-0">
+                <i class="fa fa-tasks me-2"></i>My Assigned Complaints
+              </h4>
+              <div class="d-flex gap-2">
+                <button class="btn btn-outline-primary btn-sm" (click)="filterComplaints()">
+                  <i class="fa fa-refresh me-1"></i>Refresh
+                </button>
+              </div>
+            </div>
+          </div>
+          
           <div class="card-body p-4">
             
             <!-- Filters and Search -->
             <div class="row mb-4">
-              <div class="col-md-3 mb-3">
+              <div class="col-md-4 mb-3">
                 <label class="form-label fw-semibold">
                   <i class="fa fa-search me-1"></i>Search Complaints
                 </label>
@@ -63,12 +141,12 @@
                 </select>
               </div>
               
-              <div class="col-md-3 mb-3">
+              <div class="col-md-2 mb-3">
                 <label class="form-label fw-semibold">
-                  <i class="fa fa-chart-bar me-1"></i>Analytics
+                  <i class="fa fa-chart-bar me-1"></i>Actions
                 </label>
-                <button class="btn btn-info w-100">
-                  <i class="fa fa-chart-bar me-1"></i>Reports
+                <button class="btn btn-info w-100" (click)="filterComplaints()">
+                  <i class="fa fa-filter me-1"></i>Apply Filters
                 </button>
               </div>
             </div>
@@ -85,13 +163,12 @@
                     <th>Category</th>
                     <th>Priority</th>
                     <th>Status</th>
-                    <th>Assigned To</th>
                     <th>Created</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let complaint of paginatedComplaints">
+                  <tr *ngFor="let complaint of filteredComplaints" class="complaint-row">
                     <td>
                       <strong>{{ complaint.id }}</strong>
                     </td>
@@ -119,34 +196,29 @@
                         {{ complaint.status }}
                       </span>
                     </td>
-                    <td>{{ complaint.assignedTo }}</td>
                     <td>{{ complaint.createdAt }}</td>
                     <td>
                       <div class="btn-group btn-group-sm" role="group">
                         <button type="button" class="btn btn-outline-primary" 
-                                (click)="editComplaint(complaint)" title="Edit">
-                          <i class="fa fa-edit"></i>
+                                (click)="viewComplaintDetails(complaint)" title="View Details">
+                          <i class="fa fa-eye"></i>
                         </button>
                         <button type="button" class="btn btn-outline-info" 
-                                (click)="assignComplaint(complaint)" title="Assign">
-                          <i class="fa fa-user-plus"></i>
+                                (click)="addAction(complaint)" title="Add Action">
+                          <i class="fa fa-plus"></i>
                         </button>
-                        <button type="button" class="btn btn-outline-success" 
-                                (click)="resolveComplaint(complaint)" 
-                                *ngIf="complaint.status !== 'Resolved' && complaint.status !== 'Closed'" 
-                                title="Resolve">
-                          <i class="fa fa-check"></i>
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary" 
-                                (click)="closeComplaint(complaint)" 
-                                *ngIf="complaint.status === 'Resolved'" 
-                                title="Close">
-                          <i class="fa fa-times"></i>
-                        </button>
-                        <button type="button" class="btn btn-outline-danger" 
-                                (click)="deleteComplaint(complaint)" title="Delete">
-                          <i class="fa fa-trash"></i>
-                        </button>
+                        <div class="btn-group btn-group-sm" role="group">
+                          <button type="button" class="btn btn-outline-secondary dropdown-toggle" 
+                                  data-bs-toggle="dropdown" title="Update Status">
+                            <i class="fa fa-edit"></i>
+                          </button>
+                          <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" (click)="updateStatus(complaint, 'Open')">Open</a></li>
+                            <li><a class="dropdown-item" (click)="updateStatus(complaint, 'In Progress')">In Progress</a></li>
+                            <li><a class="dropdown-item" (click)="updateStatus(complaint, 'Resolved')">Resolved</a></li>
+                            <li><a class="dropdown-item" (click)="updateStatus(complaint, 'Closed')">Closed</a></li>
+                          </ul>
+                        </div>
                       </div>
                     </td>
                   </tr>
@@ -154,45 +226,11 @@
               </table>
             </div>
 
-            <!-- Pagination -->
-            <div *ngIf="totalPages > 1" class="d-flex justify-content-center mt-4">
-              <nav>
-                <ul class="pagination">
-                  <li class="page-item" [class.disabled]="currentPage === 1">
-                    <button class="page-link" (click)="changePage(currentPage - 1)">
-                      <i class="fa fa-chevron-left"></i>
-                    </button>
-                  </li>
-                  
-                  <li class="page-item" *ngFor="let page of [].constructor(totalPages); let i = index"
-                      [class.active]="currentPage === i + 1">
-                    <button class="page-link" (click)="changePage(i + 1)">
-                      {{ i + 1 }}
-                    </button>
-                  </li>
-                  
-                  <li class="page-item" [class.disabled]="currentPage === totalPages">
-                    <button class="page-link" (click)="changePage(currentPage + 1)">
-                      <i class="fa fa-chevron-right"></i>
-                    </button>
-                  </li>
-                </ul>
-              </nav>
-            </div>
-
-            <!-- No Results -->
+            <!-- No Results Message -->
             <div *ngIf="filteredComplaints.length === 0" class="text-center py-5">
-              <i class="fa fa-exclamation-triangle fa-3x text-muted mb-3"></i>
+              <i class="fa fa-inbox fa-3x text-muted mb-3"></i>
               <h5 class="text-muted">No complaints found</h5>
-              <p class="text-muted">Try adjusting your search criteria</p>
-            </div>
-
-            <!-- Complaint Count -->
-            <div class="mt-3 text-muted">
-              <small>
-                <i class="fa fa-info-circle me-1"></i>
-                Showing {{ paginatedComplaints.length }} of {{ filteredComplaints.length }} complaints
-              </small>
+              <p class="text-muted">Try adjusting your search criteria or filters.</p>
             </div>
           </div>
         </div>
@@ -201,93 +239,156 @@
   </div>
 </div>
 
-<!-- Edit Complaint Modal -->
-<div class="modal fade" id="editComplaintModal" tabindex="-1" *ngIf="editingComplaint">
+<!-- Complaint Details Modal -->
+<div class="modal fade" [class.show]="showDetailsModal" [style.display]="showDetailsModal ? 'block' : 'none'">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header bg-primary text-white">
         <h5 class="modal-title">
-          <i class="fa fa-edit me-2"></i>Edit Complaint {{ editingComplaint.id }}
+          <i class="fa fa-file-text me-2"></i>Complaint Details - {{ selectedComplaint?.id }}
         </h5>
-        <button type="button" class="btn-close btn-close-white" (click)="cancelEdit()"></button>
+        <button type="button" class="btn-close btn-close-white" (click)="closeModals()"></button>
       </div>
-      <div class="modal-body">
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label fw-semibold">Customer Name</label>
-            <input type="text" class="form-control" [(ngModel)]="editingComplaint.customerName">
+      <div class="modal-body" *ngIf="selectedComplaint">
+        
+        <!-- Complaint Information -->
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <h6 class="fw-bold">Customer Information</h6>
+            <p><strong>Name:</strong> {{ selectedComplaint.customerName }}</p>
+            <p><strong>Email:</strong> {{ selectedComplaint.customerEmail }}</p>
+            <p><strong>Room:</strong> {{ selectedComplaint.roomNumber }}</p>
           </div>
-          <div class="col-md-6 mb-3">
-            <label class="form-label fw-semibold">Customer Email</label>
-            <input type="email" class="form-control" [(ngModel)]="editingComplaint.customerEmail">
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label fw-semibold">Room Number</label>
-            <input type="text" class="form-control" [(ngModel)]="editingComplaint.roomNumber">
-          </div>
-          <div class="col-md-6 mb-3">
-            <label class="form-label fw-semibold">Subject</label>
-            <input type="text" class="form-control" [(ngModel)]="editingComplaint.subject">
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-4 mb-3">
-            <label class="form-label fw-semibold">Category</label>
-            <select class="form-select" [(ngModel)]="editingComplaint.category">
-              <option value="Maintenance">Maintenance</option>
-              <option value="Housekeeping">Housekeeping</option>
-              <option value="Noise">Noise</option>
-              <option value="Service">Service</option>
-            </select>
-          </div>
-          <div class="col-md-4 mb-3">
-            <label class="form-label fw-semibold">Priority</label>
-            <select class="form-select" [(ngModel)]="editingComplaint.priority">
-              <option value="High">High</option>
-              <option value="Medium">Medium</option>
-              <option value="Low">Low</option>
-            </select>
-          </div>
-          <div class="col-md-4 mb-3">
-            <label class="form-label fw-semibold">Status</label>
-            <select class="form-select" [(ngModel)]="editingComplaint.status">
-              <option value="Open">Open</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Resolved">Resolved</option>
-              <option value="Closed">Closed</option>
-            </select>
+          <div class="col-md-6">
+            <h6 class="fw-bold">Complaint Information</h6>
+            <p><strong>Subject:</strong> {{ selectedComplaint.subject }}</p>
+            <p><strong>Category:</strong> 
+              <span [class]="getCategoryBadgeClass(selectedComplaint.category)">
+                {{ selectedComplaint.category }}
+              </span>
+            </p>
+            <p><strong>Priority:</strong> 
+              <span [class]="getPriorityBadgeClass(selectedComplaint.priority)">
+                {{ selectedComplaint.priority }}
+              </span>
+            </p>
+            <p><strong>Status:</strong> 
+              <span [class]="getStatusBadgeClass(selectedComplaint.status)">
+                {{ selectedComplaint.status }}
+              </span>
+            </p>
           </div>
         </div>
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label fw-semibold">Assigned To</label>
-            <select class="form-select" [(ngModel)]="editingComplaint.assignedTo">
-              <option value="Maintenance">Maintenance</option>
-              <option value="Housekeeping">Housekeeping</option>
-              <option value="Front Desk">Front Desk</option>
-              <option value="Management">Management</option>
-            </select>
-          </div>
-          <div class="col-md-6 mb-3">
-            <label class="form-label fw-semibold">Created Date</label>
-            <input type="date" class="form-control" [(ngModel)]="editingComplaint.createdAt">
+
+        <!-- Description -->
+        <div class="mb-4">
+          <h6 class="fw-bold">Description</h6>
+          <div class="card">
+            <div class="card-body">
+              {{ selectedComplaint.description }}
+            </div>
           </div>
         </div>
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Description</label>
-          <textarea class="form-control" rows="4" [(ngModel)]="editingComplaint.description"></textarea>
+
+        <!-- Action History -->
+        <div class="mb-4">
+          <h6 class="fw-bold">Action History</h6>
+          <div class="timeline">
+            <div *ngFor="let action of selectedComplaint.actions" class="timeline-item">
+              <div class="timeline-marker bg-primary"></div>
+              <div class="timeline-content">
+                <div class="d-flex justify-content-between">
+                  <h6 class="mb-1">{{ action.action }}</h6>
+                  <small class="text-muted">{{ action.timestamp }}</small>
+                </div>
+                <p class="mb-1">{{ action.details }}</p>
+                <small class="text-muted">By: {{ action.staffMember }}</small>
+                <div *ngIf="action.internalNotes" class="mt-2">
+                  <small class="text-muted fw-bold">Internal Notes:</small>
+                  <p class="mb-0 small">{{ action.internalNotes }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customer History -->
+        <div class="mb-4">
+          <h6 class="fw-bold">Customer Interaction History</h6>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Interaction</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let history of selectedComplaint.customerHistory">
+                  <td>{{ history.date }}</td>
+                  <td>{{ history.interaction }}</td>
+                  <td>{{ history.notes }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="cancelEdit()">
-          <i class="fa fa-times me-1"></i>Cancel
+        <button type="button" class="btn btn-secondary" (click)="closeModals()">
+          <i class="fa fa-times me-1"></i>Close
         </button>
-        <button type="button" class="btn btn-primary" (click)="saveComplaint()">
-          <i class="fa fa-save me-1"></i>Save Changes
+        <button type="button" class="btn btn-primary" (click)="addAction(selectedComplaint)">
+          <i class="fa fa-plus me-1"></i>Add Action
         </button>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Add Action Modal -->
+<div class="modal fade" [class.show]="showActionModal" [style.display]="showActionModal ? 'block' : 'none'">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title">
+          <i class="fa fa-plus me-2"></i>Add Action - {{ selectedComplaint?.id }}
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closeModals()"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Action Taken *</label>
+            <input type="text" class="form-control" [(ngModel)]="newAction.action" 
+                   name="action" placeholder="e.g., Initial assessment completed">
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Details</label>
+            <textarea class="form-control" rows="3" [(ngModel)]="newAction.details" 
+                      name="details" placeholder="Describe what was done..."></textarea>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Internal Notes</label>
+            <textarea class="form-control" rows="2" [(ngModel)]="newAction.internalNotes" 
+                      name="internalNotes" placeholder="Internal notes (not visible to customer)"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModals()">
+          <i class="fa fa-times me-1"></i>Cancel
+        </button>
+        <button type="button" class="btn btn-primary" (click)="saveAction()">
+          <i class="fa fa-save me-1"></i>Save Action
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Backdrop -->
+<div class="modal-backdrop fade show" *ngIf="showDetailsModal || showActionModal"></div>
